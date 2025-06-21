@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeIndy Admin Login</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .login-left {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .login-left::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.5;
+        }
+        
+        .login-left > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .login-right {
+            padding: 60px 40px;
+            background: white;
+        }
+        
+        .brand-logo {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+        }
+        
+        .login-form {
+            max-width: 400px;
+        }
+        
+        .form-floating {
+            margin-bottom: 20px;
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3);
+        }
+        
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-login:hover::before {
+            left: 100%;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+        
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+        
+        .back-link:hover {
+            color: white;
+        }
+        
+        .security-note {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .login-animation {
+            animation: slideInUp 0.6s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .login-left {
+                padding: 40px 30px;
+                text-align: center;
+            }
+            
+            .login-right {
+                padding: 40px 30px;
+            }
+            
+            .brand-logo {
+                margin: 0 auto 30px;
+            }
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('public.index') }}" class="back-link">
+        <i class="fas fa-arrow-left me-2"></i>Back to SafeIndy
+    </a>
+    
+    <div class="container">
+        <div class="login-container">
+            <div class="row g-0">
+                <!-- Left Side - Branding -->
+                <div class="col-md-6">
+                    <div class="login-left">
+                        <div class="brand-logo">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h2 class="fw-bold mb-4">SafeIndy Admin</h2>
+                        <p class="lead mb-4">
+                            Secure access to the SafeIndy administration dashboard for managing 
+                            emergency response systems and community resources.
+                        </p>
+                        <div class="features">
+                            <div class="feature mb-3">
+                                <i class="fas fa-file-alt me-3"></i>
+                                <span>Document Management</span>
+                            </div>
+                            <div class="feature mb-3">
+                                <i class="fas fa-chart-bar me-3"></i>
+                                <span>Analytics Dashboard</span>
+                            </div>
+                            <div class="feature mb-3">
+                                <i class="fas fa-cog me-3"></i>
+                                <span>System Configuration</span>
+                            </div>
+                            <div class="feature mb-3">
+                                <i class="fas fa-users me-3"></i>
+                                <span>User Management</span>
+                            </div>
+                        </div>
+                        <div class="mt-5">
+                            <small class="opacity-75">
+                                <i class="fas fa-lock me-2"></i>
+                                Protected by enterprise-grade security
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Side - Login Form -->
+                <div class="col-md-6">
+                    <div class="login-right">
+                        <div class="login-form login-animation">
+                            <h3 class="fw-bold mb-4 text-center">Administrator Login</h3>
+                            
+                            <!-- Flash Messages -->
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    {% for category, message in messages %}
+                                        <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            {{ message }}
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %}
+                            
+                            <form method="POST" id="loginForm">
+                                {{ csrf_token() }}
+                                
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="username" name="username" 
+                                           placeholder="Username" required autocomplete="username">
+                                    <label for="username">
+                                        <i class="fas fa-user me-2"></i>Username
+                                    </label>
+                                </div>
+                                
+                                <div class="form-floating">
+                                    <input type="password" class="form-control" id="password" name="password" 
+                                           placeholder="Password" required autocomplete="current-password">
+                                    <label for="password">
+                                        <i class="fas fa-lock me-2"></i>Password
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                                    <label class="form-check-label" for="remember">
+                                        Remember me for 30 days
+                                    </label>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-login btn-primary w-100" id="loginButton">
+                                    <div class="loading-spinner" id="loadingSpinner"></div>
+                                    <span id="buttonText">
+                                        <i class="fas fa-sign-in-alt me-2"></i>
+                                        Sign In
+                                    </span>
+                                </button>
+                            </form>
+                            
+                            <div class="text-center mt-4">
+                                <a href="#" class="text-decoration-none" onclick="showForgotPassword()">
+                                    <i class="fas fa-question-circle me-2"></i>
+                                    Forgot your password?
+                                </a>
+                            </div>
+                            
+                            <div class="security-note">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Security Notice:</strong> This system is for authorized personnel only. 
+                                All login attempts are logged and monitored. If you're experiencing issues 
+                                accessing your account, contact IT support.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Forgot Password Modal -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-key me-2"></i>Password Recovery
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>To reset your administrator password, please contact the system administrator or IT support:</p>
+                    <div class="contact-info">
+                        <p><strong>Email:</strong> <a href="mailto:admin@safeindy.org">admin@safeindy.org</a></p>
+                        <p><strong>Phone:</strong> <a href="tel:317-555-0199">(317) 555-0199</a></p>
+                        <p><strong>Emergency Contact:</strong> <a href="tel:317-555-0100">(317) 555-0100</a></p>
+                    </div>
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        For security reasons, password resets require identity verification.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <script>
+        // Global configuration
+        window.SafeIndy = {
+            loginAttempts: 0,
+            maxAttempts: 5,
+            lockoutTime: 15 * 60 * 1000 // 15 minutes
+        };
+        
+        // DOM elements
+        const loginForm = document.getElementById('loginForm');
+        const loginButton = document.getElementById('loginButton');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const buttonText = document.getElementById('buttonText');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        
+        // Form submission handler
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Check if account is locked
+            if (isAccountLocked()) {
+                showAlert('Account temporarily locked due to multiple failed attempts. Please try again later.', 'danger');
+                return;
+            }
+            
+            // Validate inputs
+            if (!validateInputs()) {
+                return;
+            }
+            
+            // Show loading state
+            setLoadingState(true);
+            
+            // Prepare form data
+            const formData = new FormData(loginForm);
+            
+            // Submit login request
+            fetch('/admin/login', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                setLoadingState(false);
+                
+                if (data.success) {
+                    // Successful login
+                    showAlert('Login successful! Redirecting...', 'success');
+                    
+                    // Reset attempt counter
+                    window.SafeIndy.loginAttempts = 0;
+                    localStorage.removeItem('loginAttempts');
+                    localStorage.removeItem('lockoutTime');
+                    
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = data.redirect || '/admin/dashboard';
+                    }, 1000);
+                } else {
+                    // Failed login
+                    handleFailedLogin(data.error || 'Invalid credentials');
+                }
+            })
+            .catch(error => {
+                setLoadingState(false);
+                console.error('Login error:', error);
+                showAlert('Connection error. Please try again.', 'danger');
+            });
+        });
+        
+        // Input validation
+        function validateInputs() {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            
+            if (!username) {
+                showAlert('Please enter your username.', 'warning');
+                usernameInput.focus();
+                return false;
+            }
+            
+            if (!password) {
+                showAlert('Please enter your password.', 'warning');
+                passwordInput.focus();
+                return false;
+            }
+            
+            if (username.length < 3) {
+                showAlert('Username must be at least 3 characters long.', 'warning');
+                usernameInput.focus();
+                return false;
+            }
+            
+            if (password.length < 6) {
+                showAlert('Password must be at least 6 characters long.', 'warning');
+                passwordInput.focus();
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Handle failed login attempts
+        function handleFailedLogin(errorMessage) {
+            window.SafeIndy.loginAttempts++;
+            localStorage.setItem('loginAttempts', window.SafeIndy.loginAttempts);
+            
+            const remainingAttempts = window.SafeIndy.maxAttempts - window.SafeIndy.loginAttempts;
+            
+            if (remainingAttempts <= 0) {
+                // Lock account
+                const lockoutTime = Date.now() + window.SafeIndy.lockoutTime;
+                localStorage.setItem('lockoutTime', lockoutTime);
+                
+                showAlert('Too many failed attempts. Account locked for 15 minutes.', 'danger');
+                disableForm(true);
+            } else {
+                showAlert(`${errorMessage}. ${remainingAttempts} attempts remaining.`, 'danger');
+            }
+            
+            // Clear password field
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+        
+        // Check if account is locked
+        function isAccountLocked() {
+            const lockoutTime = localStorage.getItem('lockoutTime');
+            if (!lockoutTime) return false;
+            
+            const now = Date.now();
+            if (now < parseInt(lockoutTime)) {
+                return true;
+            } else {
+                // Lockout expired, clear storage
+                localStorage.removeItem('lockoutTime');
+                localStorage.removeItem('loginAttempts');
+                window.SafeIndy.loginAttempts = 0;
+                return false;
+            }
+        }
+        
+        // Set loading state
+        function setLoadingState(loading) {
+            loginButton.disabled = loading;
+            loadingSpinner.style.display = loading ? 'inline-block' : 'none';
+            buttonText.innerHTML = loading ? 
+                'Signing In...' : 
+                '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
+        }
+        
+        // Disable/enable form
+        function disableForm(disabled) {
+            usernameInput.disabled = disabled;
+            passwordInput.disabled = disabled;
+            loginButton.disabled = disabled;
+        }
+        
+        // Show alert message
+        function showAlert(message, type) {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Create new alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${getAlertIcon(type)} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Insert before form
+            loginForm.parentNode.insertBefore(alertDiv, loginForm);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        // Get alert icon based on type
+        function getAlertIcon(type) {
+            const icons = {
+                'success': 'check-circle',
+                'danger': 'exclamation-triangle',
+                'warning': 'exclamation-circle',
+                'info': 'info-circle'
+            };
+            return icons[type] || 'info-circle';
+        }
+        
+        // Show forgot password modal
+        function showForgotPassword() {
+            const modal = new bootstrap.Modal(document.getElementById('forgotPasswordModal'));
+            modal.show();
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Enter key on username field moves to password
+            if (e.key === 'Enter' && e.target === usernameInput) {
+                e.preventDefault();
+                passwordInput.focus();
+            }
+            
+            // Escape key clears form
+            if (e.key === 'Escape') {
+                usernameInput.value = '';
+                passwordInput.value = '';
+                usernameInput.focus();
+            }
+        });
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load stored login attempts
+            const storedAttempts = localStorage.getItem('loginAttempts');
+            if (storedAttempts) {
+                window.SafeIndy.loginAttempts = parseInt(storedAttempts);
+            }
+            
+            // Check if account is locked on page load
+            if (isAccountLocked()) {
+                const lockoutTime = localStorage.getItem('lockoutTime');
+                const remainingTime = Math.ceil((parseInt(lockoutTime) - Date.now()) / 60000);
+                showAlert(`Account locked. Try again in ${remainingTime} minutes.`, 'danger');
+                disableForm(true);
+                
+                // Set timer to re-enable form
+                setTimeout(() => {
+                    location.reload();
+                }, parseInt(lockoutTime) - Date.now());
+            }
+            
+            // Focus username field
+            usernameInput.focus();
+            
+            // Add input event listeners for real-time validation
+            usernameInput.addEventListener('input', function() {
+                if (this.value.length >= 3) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                }
+            });
+            
+            passwordInput.addEventListener('input', function() {
+                if (this.value.length >= 6) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                }
+            });
+        });
+        
+        // Prevent form auto-fill attacks
+        setTimeout(() => {
+            if (usernameInput.value || passwordInput.value) {
+                // Potential auto-fill detected, clear fields
+                usernameInput.value = '';
+                passwordInput.value = '';
+            }
+        }, 100);
+        
+        // Add security headers (for demonstration)
+        console.log('%cSafety Notice', 'color: red; font-size: 20px; font-weight: bold;');
+        console.log('%cThis is a restricted system. Unauthorized access is prohibited.', 'color: red; font-size: 14px;');
+    </script>
+</body>
+</html>

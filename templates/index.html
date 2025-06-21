@@ -1,0 +1,480 @@
+{% extends "base.html" %}
+
+{% block title %}SafeIndy Assistant - Emergency Chat{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        height: 70vh;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .chat-messages {
+        height: calc(100% - 80px);
+        overflow-y: auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .message {
+        margin-bottom: 15px;
+        display: flex;
+        align-items: flex-start;
+    }
+    
+    .message.user {
+        justify-content: flex-end;
+    }
+    
+    .message.assistant {
+        justify-content: flex-start;
+    }
+    
+    .message-bubble {
+        max-width: 70%;
+        padding: 12px 16px;
+        border-radius: 18px;
+        word-wrap: break-word;
+        position: relative;
+    }
+    
+    .message.user .message-bubble {
+        background: #007bff;
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+    
+    .message.assistant .message-bubble {
+        background: white;
+        color: #333;
+        border: 1px solid #e9ecef;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .message-time {
+        font-size: 0.75rem;
+        opacity: 0.7;
+        margin-top: 4px;
+    }
+    
+    .chat-input-container {
+        padding: 15px;
+        background: white;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .emergency-panel {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(220, 53, 69, 0.3);
+    }
+    
+    .weather-widget {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .typing-indicator {
+        display: none;
+        padding: 10px;
+        font-style: italic;
+        color: #6c757d;
+    }
+    
+    .typing-indicator .dot {
+        animation: typing 1.4s infinite;
+        opacity: 0;
+    }
+    
+    .typing-indicator .dot:nth-child(1) { animation-delay: 0s; }
+    .typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes typing {
+        0%, 60%, 100% { opacity: 0; }
+        30% { opacity: 1; }
+    }
+    
+    .emergency-mode {
+        animation: emergency-pulse 2s infinite;
+    }
+    
+    @keyframes emergency-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+        50% { box-shadow: 0 0 0 20px rgba(220, 53, 69, 0); }
+    }
+    
+    .location-sharing {
+        background: #28a745;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .location-sharing:hover {
+        background: #218838;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main Chat Column -->
+        <div class="col-lg-8">
+            <!-- Emergency Alert Panel -->
+            <div class="emergency-panel">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h4><i class="fas fa-exclamation-triangle me-2"></i>Emergency Response Ready</h4>
+                        <p class="mb-0">I'm here to help with emergencies, safety questions, and local resources in Indianapolis.</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-light btn-lg" onclick="toggleEmergencyMode()">
+                            <i class="fas fa-bell me-2"></i>Emergency Mode
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Interface -->
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Welcome Message -->
+                    <div class="message assistant">
+                        <div class="message-bubble">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-robot text-primary me-2"></i>
+                                <strong>SafeIndy Assistant</strong>
+                            </div>
+                            <p class="mb-2">Hello! I'm your SafeIndy Assistant. I can help you with:</p>
+                            <ul class="mb-2">
+                                <li>Emergency guidance and safety tips</li>
+                                <li>Local weather and traffic updates</li>
+                                <li>City services and resources</li>
+                                <li>Healthcare and social services</li>
+                            </ul>
+                            <p class="mb-0">How can I assist you today?</p>
+                            <div class="message-time">Just now</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Typing Indicator -->
+                <div class="typing-indicator" id="typingIndicator">
+                    <i class="fas fa-robot text-primary me-2"></i>
+                    SafeIndy is typing<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+                </div>
+                
+                <!-- Chat Input -->
+                <div class="chat-input-container">
+                    <div class="row g-2">
+                        <div class="col">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="messageInput" 
+                                       placeholder="Type your message or ask about emergencies..." 
+                                       autocomplete="off">
+                                <button class="btn btn-primary" type="button" id="sendButton">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn location-sharing" type="button" id="locationButton" 
+                                    data-bs-toggle="tooltip" title="Share your location for better assistance">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Weather Widget -->
+            <div class="weather-widget" id="weatherWidget">
+                <h5><i class="fas fa-cloud-sun me-2"></i>Indianapolis Weather</h5>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="weather-temp">--°F</div>
+                        <div class="weather-desc">Loading...</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="weather-details">
+                            <small>Feels like: --°F</small><br>
+                            <small>Humidity: --%</small><br>
+                            <small>Wind: -- mph</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-danger" onclick="sendQuickMessage('This is an emergency')">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Report Emergency
+                        </button>
+                        <button class="btn btn-warning" onclick="sendQuickMessage('I need medical help')">
+                            <i class="fas fa-medical me-2"></i>Medical Assistance
+                        </button>
+                        <button class="btn btn-info" onclick="sendQuickMessage('What is the current weather?')">
+                            <i class="fas fa-cloud me-2"></i>Weather Update
+                        </button>
+                        <button class="btn btn-secondary" onclick="sendQuickMessage('Find nearest hospital')">
+                            <i class="fas fa-hospital me-2"></i>Find Hospital
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Local Map -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-map me-2"></i>Your Location</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map" style="height: 250px; width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Google Maps API -->
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script>
+
+<script>
+let map;
+let userLocation = null;
+let chatHistory = [];
+
+// Initialize Google Map
+function initMap() {
+    // Default to Indianapolis
+    const indianapolis = { lat: 39.7684, lng: -86.1581 };
+    
+    map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 12,
+        center: indianapolis,
+        styles: [
+            {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [{ visibility: 'off' }]
+            }
+        ]
+    });
+    
+    // Try to get user's location
+    getCurrentLocation()
+        .then(position => {
+            userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            
+            map.setCenter(userLocation);
+            new google.maps.Marker({
+                position: userLocation,
+                map: map,
+                title: 'Your Location',
+                icon: {
+                    url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+                }
+            });
+        })
+        .catch(error => {
+            console.log('Location access denied:', error);
+        });
+}
+
+// Load weather data
+function loadWeather() {
+    fetch('/api/weather')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const weather = data.weather;
+                document.querySelector('.weather-temp').textContent = `${Math.round(weather.temperature)}°F`;
+                document.querySelector('.weather-desc').textContent = weather.description;
+                document.querySelector('.weather-details').innerHTML = `
+                    <small>Feels like: ${Math.round(weather.feels_like)}°F</small><br>
+                    <small>Humidity: ${weather.humidity}%</small><br>
+                    <small>Wind: ${Math.round(weather.wind_speed)} mph</small>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Weather load error:', error);
+        });
+}
+
+// Send message function
+function sendMessage(message, includeLocation = false) {
+    if (!message.trim()) return;
+    
+    // Add user message to chat
+    addMessage(message, 'user');
+    
+    // Show typing indicator
+    document.getElementById('typingIndicator').style.display = 'block';
+    scrollToBottom();
+    
+    // Prepare request data
+    const requestData = {
+        message: message,
+        session_id: generateSessionId(),
+        location: includeLocation ? userLocation : null,
+        emergency_mode: window.SafeIndy.emergencyMode
+    };
+    
+    // Send to API
+    fetch('/api/chat/message', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': window.SafeIndy.csrfToken
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('typingIndicator').style.display = 'none';
+        
+        if (data.success) {
+            addMessage(data.response, 'assistant', data.sources);
+        } else {
+            addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+        }
+    })
+    .catch(error => {
+        document.getElementById('typingIndicator').style.display = 'none';
+        addMessage('Connection error. Please check your internet and try again.', 'assistant');
+        console.error('Chat error:', error);
+    });
+}
+
+// Add message to chat
+function addMessage(message, sender, sources = null) {
+    const messagesContainer = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}`;
+    
+    let sourcesHtml = '';
+    if (sources && sources.length > 0) {
+        sourcesHtml = `
+            <div class="mt-2 pt-2 border-top">
+                <small class="text-muted">Sources:</small>
+                <ul class="list-unstyled mb-0">
+                    ${sources.map(source => `<li><small><i class="fas fa-link me-1"></i>${source}</small></li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    messageDiv.innerHTML = `
+        <div class="message-bubble">
+            ${sender === 'assistant' ? '<i class="fas fa-robot text-primary me-2"></i>' : ''}
+            <div class="message-content">${message}</div>
+            ${sourcesHtml}
+            <div class="message-time">${new Date().toLocaleTimeString()}</div>
+        </div>
+    `;
+    
+    messagesContainer.appendChild(messageDiv);
+    scrollToBottom();
+    
+    // Store in chat history
+    chatHistory.push({ message, sender, timestamp: new Date() });
+}
+
+// Send quick message
+function sendQuickMessage(message) {
+    sendMessage(message, true);
+}
+
+// Scroll to bottom of chat
+function scrollToBottom() {
+    const messagesContainer = document.getElementById('chatMessages');
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Generate session ID
+function generateSessionId() {
+    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const locationButton = document.getElementById('locationButton');
+    
+    // Send message on button click
+    sendButton.addEventListener('click', function() {
+        const message = messageInput.value;
+        if (message.trim()) {
+            sendMessage(message);
+            messageInput.value = '';
+        }
+    });
+    
+    // Send message on Enter key
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendButton.click();
+        }
+    });
+    
+    // Location sharing
+    locationButton.addEventListener('click', function() {
+        getCurrentLocation()
+            .then(position => {
+                userLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                
+                showAlert('Location shared successfully!', 'success');
+                
+                // Update map
+                if (map) {
+                    map.setCenter(userLocation);
+                    new google.maps.Marker({
+                        position: userLocation,
+                        map: map,
+                        title: 'Your Current Location'
+                    });
+                }
+            })
+            .catch(error => {
+                showAlert('Unable to access location. Please enable location services.', 'warning');
+            });
+    });
+    
+    // Load initial data
+    loadWeather();
+    
+    // Update weather every 30 minutes
+    setInterval(loadWeather, 30 * 60 * 1000);
+});
+</script>
+{% endblock %}

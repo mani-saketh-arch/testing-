@@ -1,0 +1,58 @@
+# Core FastAPI Framework
+fastapi
+uvicorn[standard]
+python-multipart
+jinja2
+python-dotenv
+
+# Database & ORM
+sqlalchemy
+
+# Authentication & Security
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt
+
+# AI & Machine Learning Services
+boto3
+groq
+llama-index
+qdrant-client
+
+# LlamaIndex Extensions
+llama-index-readers-file
+llama-index-embeddings-cohere
+llama-index-vector-stores-qdrant
+
+# External API Services
+googlemaps
+requests
+aiohttp
+
+# Document Processing
+PyPDF2
+pdf2image
+pytesseract
+Pillow
+
+# Data Processing & Utilities
+pandas
+numpy
+python-dateutil
+validators
+
+# Telegram Bot
+python-telegram-bot
+
+# Production & Deployment
+gunicorn
+redis
+
+# Development & Testing (optional)
+pytest
+pytest-asyncio
+black
+flake8
+
+# Logging & Monitoring
+loguru
